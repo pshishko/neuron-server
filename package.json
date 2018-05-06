@@ -1,0 +1,19 @@
+{
+  "name": "Skeleton",
+  "description": "Skeleton",
+  "version": "1.0.0",
+  "dependencies": {
+    "colors": "*",
+    "crypto": "*",
+    "dateformat": "*",
+    "events": "*",
+    "lodash": "^4.17.10",
+    "optimist": "*",
+    "restler": "*",
+    "socket.io": "*"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=0.12.0"
+  }
+}
