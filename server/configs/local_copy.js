@@ -16,6 +16,10 @@ Server.Config = function() {
         },
         cryptKey    : '123someSecretKey123',
         consoleLog  : 1,    // 1 - on, 0 - off
+        neuron      : {
+            alpha: 1,
+            learn_step_k: 0.2,
+        },
     };
 }();
 

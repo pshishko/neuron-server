@@ -4,39 +4,35 @@ module.exports = function (Server, config, _, pr) {
 
 	return function () {
 
-		var service			= {};
-        service.alpha       = 1;
-        service.EI;
+		return	{
+            EI: null,
+            id: null,
+            axon: null,
+            sinapses: [],
 
-        service.id;
-        service.axon;
-        service.sinapses = [];
+            new: function(id, inNeurons) {
+                this.id     = id;
+                let neuron  = _.clone(this);
+                neuron.newSinapses(inNeurons, neuron);
+                return neuron;
+            },
 
-        service.new = function(id, inNeurons) {
-            this.id     = id;
-            let neuron  = _.clone(this);
-            neuron.newSinapses(inNeurons, neuron);
-            return neuron;
-        }
+            newSinapses: function(inNeurons, outNeuron) {
+                this.sinapses = _.map(inNeurons, function(inNeuron, key) {
+                    return Server.neuron.Sinaps.new('(' + inNeuron.id + ')/(' + outNeuron.id + ')' + (key + 1), inNeuron, outNeuron);
+                });
+            },
 
-        service.newSinapses = function(inNeurons, outNeuron) {
-            this.sinapses = _.map(inNeurons, function(inNeuron, key) {
-                return Server.neuron.Sinaps.new('(' + inNeuron.id + ')/(' + outNeuron.id + ')' + (key + 1), inNeuron, outNeuron);
-            });
-        }
+            getSinapsesWeight: function() {
+                return _.sum(_.map(this.sinapses, function(sinaps) {
+                    return sinaps.inSignal();
+                }));
+            },
 
-        service.getSinapsesWeight = function() {
-            return _.sum(_.map(this.sinapses, function(sinaps) {
-                return sinaps.inSignal();
-            }));
+            activation: function() {
+                return 1 / (1 + Math.exp(-1 * config.neuron.alpha * this.weight));
+            },
         };
 
-        service.activation = function() {
-            return 1 / (1 + Math.exp(-1 * this.alpha * this.weight));
-        };
-
-		/******************************************************************************************************************/
-
-		return service;
 	}();
 };

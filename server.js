@@ -3,6 +3,7 @@
 	'use strict';
 
 	var config = require('./server/configs/local');
+    const cTable = require('console.table');
 
 	var colors = require('colors');
 	var pr = (config.consoleLog !== 0) ? require('./server/components/pr') : function() {};

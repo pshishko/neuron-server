@@ -7,30 +7,19 @@ module.exports = function(Server, config, _, pr) {
 		var service = {};
 
 		service.init = function() {
-			// service.registerCronJobs();
 
-            let network = Server.neuron.Network.init(2, 2, 2);
-            // pr(network.getNetwork(), 1);
+            let network = Server.neuron.Network.init(3, 5, 9);
+            let data = Server.neuron.NetworkGenerator.getData([0.33, 0.33, 0.34], 2);
+            pr(network.training(data));
+            console.table(network.test(data));
+
+            data = Server.neuron.NetworkGenerator.getData([0.33, 0.33, 0.34], 3);
+            console.table(network.test(data));
 
 
-            pr(network.getNetwork());
-            pr(network.forecast([1, 1]));
-            pr(network.forecast([1, 0]));
-            pr(network.learn([1, 1], 1));
-            pr(network.forecast([1, 1]));
-            pr(network.learn([0, 1], 0));
-            pr(network.forecast([0, 0]));
-            pr(network.forecast([0, 1]));
-            pr(network.training([
-                [1, 1, 1],
-                [1, 0, 1],
-                [0, 1, 0],
-                [0, 0, 0],
-            ]));
+            pr(123, 1);
 
-            pr(network.forecast([0, 0]));
-            pr(network.forecast([0, 1]));
-            pr(123,1);
+            // pr(network.getNetwork());
 		}
 
 		// service.registerCronJobs = function () {

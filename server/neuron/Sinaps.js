@@ -4,28 +4,24 @@ module.exports = function (Server, config, _, pr) {
 
 	return function () {
 
-		var service			= {};
+		return {
+            id: null,
+            inNeuron: {},
+            outNeuron: {},
+            weight: null,
 
-        service.id;
-        service.inNeuron = {};
-        service.outNeuron = {};
-        service.weight;
+            new: function(id, inNeuron, outNeuron) {
+                this.id = id;
+                this.inNeuron    = inNeuron;
+                this.outNeuron   = outNeuron;
+                this.weight      = (Math.random() * 3) - 1.5;
 
-        service.new = function(id, inNeuron, outNeuron) {
-            service.id = id;
-            service.inNeuron    = inNeuron;
-            service.outNeuron   = outNeuron;
-            service.weight      = (Math.random() * 3) - 1.5;
+                return _.clone(this);
+            },
 
-            return _.clone(service);
-        }
-
-        service.inSignal = function() {
-            return this.weight * this.inNeuron.axon;
-        }
-
-		/******************************************************************************************************************/
-
-		return service;
+            inSignal: function () {
+                return this.weight * this.inNeuron.axon;
+            }
+        };
 	}();
 };
