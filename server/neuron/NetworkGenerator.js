@@ -4,21 +4,21 @@ module.exports = function (Server, config, _, pr) {
 
 	return function () {
         return {
-            getData: function(signalsWeight, gradient) {
-                return _.map(this.getBalancedData(signalsWeight.length, gradient), (row) => {
+            getBalancedData: function(signalsWeight, gradient) {
+                return _.map(this.getData(signalsWeight.length, gradient), (row) => {
                     return _.concat(row, _.sum(_.map(row, (col, key) => {
                         return signalsWeight[key] * col;
                     })));
                 }).sort((a, b) => a[3] < b[3]);
             },
 
-            getBalancedData: function(signalsCount, gradient) {
+            getData: function(signalsCount, gradient) {
                 if (signalsCount <= 1) {
                     return this.gradientRange(gradient);
                 }
 
                 return _.merge(_.flatten(_.map(this.gradientRange(gradient), (key) => {
-                    return _.map(this.getBalancedData(signalsCount - 1, gradient), (g) => {
+                    return _.map(this.getData(signalsCount - 1, gradient), (g) => {
                         return _.concat(key, g);
                     });
                 })));

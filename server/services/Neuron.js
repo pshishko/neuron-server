@@ -9,11 +9,11 @@ module.exports = function(Server, config, _, pr) {
 		service.init = function() {
 
             let network = Server.neuron.Network.init(3, 5, 9);
-            let data = Server.neuron.NetworkGenerator.getData([0.33, 0.33, 0.34], 2);
+            let data = Server.neuron.NetworkGenerator.getBalancedData([0.33, 0.33, 0.34], 2);
             pr(network.training(data));
             console.table(network.test(data));
 
-            data = Server.neuron.NetworkGenerator.getData([0.33, 0.33, 0.34], 3);
+            data = Server.neuron.NetworkGenerator.getBalancedData([0.33, 0.33, 0.34], 3);
             console.table(network.test(data));
 
 
