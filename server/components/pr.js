@@ -10,7 +10,7 @@ module.exports = function (data, stop) {
 
 	if (typeof data == 'object') {
 		console.log('\n>>> ******************************************************************************'.yellow);
-		console.log("[", nameLine, "][", typeof data, "] ==> ", data);
+		console.log("[", nameLine, "][", typeof data, "] ==> \n ", data);
 		console.log('>>> ******************************************************************************'.yellow);
 	} else {
 		console.log("\n>>> [%s][%s] ==> %s", nameLine, typeof data, data);

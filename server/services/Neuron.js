@@ -1,4 +1,4 @@
-module.exports = function(Server, config, _, pr) {
+module.exports = function(Server, config, _, dd) {
 
 	'use strict';
 
@@ -8,18 +8,27 @@ module.exports = function(Server, config, _, pr) {
 
 		service.init = function() {
 
-            let network = Server.neuron.Network.init(3, 5, 9);
-            let data = Server.neuron.NetworkGenerator.getBalancedData([0.33, 0.33, 0.34], 2);
-            pr(network.training(data));
-            console.table(network.test(data));
+            let network = Server.neuron.Network.init(2, 2, 2);
+            let data = Server.neuron.NetworkGenerator.getBalancedData([0.50, 0.50], 2);
 
-            data = Server.neuron.NetworkGenerator.getBalancedData([0.33, 0.33, 0.34], 3);
-            console.table(network.test(data));
+            Server.neuron.NetworkStorage.storeList('list', data);
+            Server.neuron.NetworkStorage.storeNetwork('network_init', network.getNetworkData());
+
+//             network.training(data);
+setTimeout(() => {
+    dd(Server.neuron.NetworkStorage.loadNetwork('network_init'),1);
+
+}, 1000);
+//             Server.neuron.NetworkStorage.storeNetwork('network_2', network.getNetworkData());
+// dd(Server.neuron.NetworkStorage.loadNetwork('network_2'),1);
+            // console.table(network.test(data));
+
+            // data = Server.neuron.NetworkGenerator.getBalancedData([0.33, 0.33, 0.34], 3);
+            // console.table(network.test(data));
 
 
-            pr(123, 1);
+            // pr(123, 1);
 
-            // pr(network.getNetwork());
 		}
 
 		// service.registerCronJobs = function () {

@@ -1,4 +1,4 @@
-module.exports = function (Server, config, _, pr) {
+module.exports = function (Server, config, _, dd) {
 
 	'use strict';
 
@@ -11,9 +11,9 @@ module.exports = function (Server, config, _, pr) {
             outLayers: [],
 
             init: function(signalsCount, hdLayersCount, hdNeuronsCount) {
-                this.inLayers = this.newLayers('in_', 1, signalsCount, null);
-                this.hdLayers = this.newLayers('hd_', hdLayersCount, hdNeuronsCount, this.inLayers[0]);
-                this.outLayers = this.newLayers('out_', 1, 1, this.hdLayers[hdLayersCount - 1]);
+                this.inLayers = this.newLayers('in', 1, signalsCount, null);
+                this.hdLayers = this.newLayers('hd', hdLayersCount, hdNeuronsCount, this.inLayers[0]);
+                this.outLayers = this.newLayers('out', 1, 1, this.hdLayers[hdLayersCount - 1]);
                 this.layers = _.union(this.inLayers, this.hdLayers, this.outLayers);
                 return _.clone(this);
             },
@@ -26,14 +26,15 @@ module.exports = function (Server, config, _, pr) {
                 });
             },
 
-            getNetwork: function() {
-                return _.map(this.layers, function(layer) {
-                    return {
-                        'id': layer.id,
-                        'neurons_count': layer.getNeurons().length,
-                        'sinapses_count': layer.getSinapses().length,
-                    };
-                });
+            getNetworkData: function() {
+                return _.chain(this.layers)
+                    .map(layer => {
+                        return layer.get();
+                    }).value();
+            },
+
+            loadFromData: function(data) {
+                dd(this,1);
             },
 
             forecast: function(data) {
@@ -48,7 +49,7 @@ module.exports = function (Server, config, _, pr) {
             },
 
             learn: function(data, result) {
-                this.forecast(data);
+                dd(this.forecast(data));
 
                 this.calcGradientError(result);
                 this.gradient();
@@ -60,20 +61,20 @@ module.exports = function (Server, config, _, pr) {
 
             training: function(list) {
                 let epoch = 0;
-                let currDeviation = 1;
+                let deviations = [];
+                let avgDeviation = 1;
                 let maxDeviation = 1;
 
-                while (epoch < 100000 && (/*currDeviation >= 0.03 || */maxDeviation >= 0.03 || epoch <= 100)) {
+                while (epoch < 2000 && (avgDeviation >= 0.08 || maxDeviation >= 0.08 || epoch <= 100)) {
                     epoch++;
 
-                    let deviations = [];
                     _.each(_.slice(list, 0, -1), (row) => {
                         deviations.push(this.learn(row, _.last(row)));
                     });
-                    currDeviation = _.sum(deviations) / deviations.length;
+                    avgDeviation = _.sum(deviations) / deviations.length;
                     maxDeviation =  _.max(deviations);
                     if (epoch % 100 === 0) {
-                        pr('On epoch ' + epoch + ' max deviation is ' + currDeviation);
+                        dd('On epoch ' + epoch + ' max ' + maxDeviation + ' avg ' + avgDeviation);
                     }
                 }
 
@@ -85,11 +86,15 @@ module.exports = function (Server, config, _, pr) {
                     let signals         = _.slice(row, 0, -1);
                     let result          = row[signals.length];
                     let approximation   = this.forecast(signals);
-
+// pr(signals);
+// pr(result);
+// pr(approximation, 1);
                     // row.push(Math.round(this.forecast(signals), -2))
-                    signals.push(this.round(result))
-                    signals.push(this.round(approximation))
-                    signals.push(this.round(Math.abs(result - approximation)))
+                    signals.push(result);
+                    signals.push(this.round(result));
+                    signals.push(approximation);
+                    signals.push(this.round(approximation));
+                    signals.push(this.round(Math.abs(result - approximation)));
                     return signals;
                 }).sort((a, b) => a[0] < b[0]);
             },
@@ -106,13 +111,19 @@ module.exports = function (Server, config, _, pr) {
             calcGradientError: function(result) {
                 let outputNeuron       = this.getOutputNeuron();
 
-                outputNeuron.EI   = (outputNeuron.axon - result) * outputNeuron.axon * (1 - outputNeuron.axon);
+                outputNeuron.EI   = (result - outputNeuron.axon) * outputNeuron.deviationActivation;
 
-                _.each(_.reverse(_.slice(this.layers, 1)), (layer) => {
+                _.each(_.reverse(_.slice(this.layers, 1, this.layers.length - 1)), (layer) => {
                     _.each(layer.neurons, (neuron) => {
-                        _.each(neuron.sinapses, (sinaps) => {
-                            sinaps.inNeuron.EI = neuron.EI * sinaps.inNeuron.axon * (1 - sinaps.inNeuron.axon) * sinaps.weight;
-                        });
+                        let sum = _.chain(neuron.outputSinapses)
+                                .map(sinaps => {
+                                    return sinaps.outNeuron.EI * sinaps.weight;
+                                })
+                                .sum()
+                                .value();
+
+                        neuron.EI = sum * neuron.deviationActivation;
+                        // dd(neuron.EI);
                     });
                 });
             },
@@ -121,11 +132,12 @@ module.exports = function (Server, config, _, pr) {
                 _.each(this.layers, (layer) => {
                     _.each(layer.neurons, (neuron) => {
                         _.each(neuron.sinapses, (sinaps) => {
-                            sinaps.weight = sinaps.weight - config.neuron.learn_step_k * sinaps.inNeuron.axon * sinaps.outNeuron.EI;
+                            sinaps.weight += config.neuron.learn_step_k * sinaps.inNeuron.axon * sinaps.outNeuron.EI;
                         });
                     });
                 });
             },
+
         };
 	}();
 };

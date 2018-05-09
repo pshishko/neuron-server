@@ -5,11 +5,11 @@ module.exports = function (Server, config, _, pr) {
 	return function () {
         return {
             getBalancedData: function(signalsWeight, gradient) {
-                return _.map(this.getData(signalsWeight.length, gradient), (row) => {
+                return _.sortBy(_.map(this.getData(signalsWeight.length, gradient), (row) => {
                     return _.concat(row, _.sum(_.map(row, (col, key) => {
                         return signalsWeight[key] * col;
                     })));
-                }).sort((a, b) => a[3] < b[3]);
+                }), -3);
             },
 
             getData: function(signalsCount, gradient) {

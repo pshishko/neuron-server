@@ -1,4 +1,4 @@
-module.exports = function (Server, config, _, pr) {
+module.exports = function (Server, config, _, dd) {
 
 	'use strict';
 
@@ -26,6 +26,16 @@ module.exports = function (Server, config, _, pr) {
                 }.bind(this));
             },
 
+            get: function() {
+                return {
+                    id: this.id,
+                    neurons: _.map(this.neurons, neuron => {
+                        dd(neuron.get());
+                        return neuron.get();
+                    })
+                }
+            },
+
             getNeurons: function() {
                 return _.map(this.neurons, function(neuron) {
                     return neuron.id + ' / ' + neuron.axon;
@@ -33,7 +43,9 @@ module.exports = function (Server, config, _, pr) {
             },
 
             getSinapses: function() {
+                pr(this.id);
                 return _.map(this.neurons, function(neuron) {
+                    pr(neuron.sinapses.length);
                     return _.map(neuron.sinapses, function(sinaps) {
                         return sinaps.id + ' / ' + sinaps.weight;
                     });
@@ -42,11 +54,7 @@ module.exports = function (Server, config, _, pr) {
 
             calculate: function() {
                 _.each(this.neurons, function(neuron) {
-                    neuron.weight   = neuron.getSinapsesWeight();
-                    if (neuron.weight == NaN) {
-                        pr(neuron);
-                    }
-                    neuron.axon     = neuron.activation();
+                    neuron.calculate();
                 });
             },
         };
