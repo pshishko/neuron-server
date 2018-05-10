@@ -25,7 +25,6 @@ module.exports = function (Server, config, _, dd) {
                 this.sinapses = _.map(inNeurons, function(inNeuron, key) {
                     let sinaps = Server.neuron.Sinaps.new('(' + inNeuron.id + ')/(' + outNeuron.id + ')' + (key + 1), inNeuron, outNeuron);
                     inNeuron.outputSinapses.push(sinaps);
-                    dd(inNeuron.outputSinapses);
                     return sinaps;
                 });
             },

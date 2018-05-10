@@ -49,7 +49,7 @@ module.exports = function (Server, config, _, dd) {
             },
 
             learn: function(data, result) {
-                dd(this.forecast(data));
+                this.forecast(data);
 
                 this.calcGradientError(result);
                 this.gradient();
@@ -61,13 +61,13 @@ module.exports = function (Server, config, _, dd) {
 
             training: function(list) {
                 let epoch = 0;
-                let deviations = [];
                 let avgDeviation = 1;
                 let maxDeviation = 1;
 
-                while (epoch < 2000 && (avgDeviation >= 0.08 || maxDeviation >= 0.08 || epoch <= 100)) {
+                while (epoch < 20000 && (avgDeviation >= 0.08 || maxDeviation >= 0.08 || epoch <= 100)) {
                     epoch++;
 
+                    let deviations = [];
                     _.each(_.slice(list, 0, -1), (row) => {
                         deviations.push(this.learn(row, _.last(row)));
                     });
@@ -123,7 +123,6 @@ module.exports = function (Server, config, _, dd) {
                                 .value();
 
                         neuron.EI = sum * neuron.deviationActivation;
-                        // dd(neuron.EI);
                     });
                 });
             },

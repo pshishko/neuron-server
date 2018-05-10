@@ -14,7 +14,9 @@ module.exports = function(Server, config, _, dd) {
             Server.neuron.NetworkStorage.storeList('list', data);
             Server.neuron.NetworkStorage.storeNetwork('network_init', network.getNetworkData());
 
-//             network.training(data);
+            network.training(data);
+            Server.neuron.NetworkStorage.storeNetwork('network_2', network.getNetworkData());
+
 setTimeout(() => {
     dd(Server.neuron.NetworkStorage.loadNetwork('network_init'),1);
 
