@@ -13,27 +13,45 @@ module.exports = function (Server, config, _, dd) {
             outputSinapses: null,
             deviationActivation: null,
 
-            new: function(id, inNeurons) {
-                this.id     = id;
+            globalNeurons: {},
+
+            new: function(id) {
                 let neuron  = _.clone(this);
+                neuron.id   = id;
                 neuron.outputSinapses = [];
-                neuron.newSinapses(inNeurons, neuron);
+
+                this.globalNeurons[neuron.id] = neuron;
                 return neuron;
             },
 
-            newSinapses: function(inNeurons, outNeuron) {
-                this.sinapses = _.map(inNeurons, function(inNeuron, key) {
-                    let sinaps = Server.neuron.Sinaps.new('(' + inNeuron.id + ')/(' + outNeuron.id + ')' + (key + 1), inNeuron, outNeuron);
+            newSinapses: function(inNeurons) {
+                this.sinapses = _.map(inNeurons, (inNeuron, key) => {
+                    let sinaps = Server.neuron.Sinaps.new('(' + inNeuron.id + ')/(' + this.id + ')' + (key + 1), inNeuron, this);
+                    inNeuron.outputSinapses.push(sinaps);
+                    return sinaps;
+                });
+            },
+
+            load: function(neuron) {
+                let newNeuron = this.new(neuron.id);
+                newNeuron.EI = neuron.EI;
+                newNeuron.weight = neuron.weight;
+                newNeuron.deviationActivation = neuron.deviationActivation;
+                return newNeuron;
+            },
+
+            loadSinapses: function(sinapses, inNeurons) {
+                this.sinapses = _.map(inNeurons, (inNeuron, key) => {
+                    let sinaps = Server.neuron.Sinaps.load(sinapses[key], inNeuron, this);
                     inNeuron.outputSinapses.push(sinaps);
                     return sinaps;
                 });
             },
 
             get: function() {
+                dd(this);
                 return {
                     id: this.id,
-                    axon: this.axon,
-                    weight: this.weight,
                     sinapses: _.map(this.sinapses, sinaps => {
                         return sinaps.get();
                     }),

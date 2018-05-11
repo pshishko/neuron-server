@@ -10,22 +10,40 @@ module.exports = function (Server, config, _, dd) {
             outNeuron: {},
             weight: null,
 
+            globalSinapses: {},
+
             new: function(id, inNeuron, outNeuron) {
-                this.id = id;
-                this.inNeuron    = inNeuron;
-                this.outNeuron   = outNeuron;
+                let sinaps = _.clone(this);
+                sinaps.id = id;
+                sinaps.inNeuron    = inNeuron;
+                sinaps.outNeuron   = outNeuron;
 
                 let range = (1 / 9) * 1000;
-                this.weight = _.random(-1 * range, range) / 1000;
-
-                return _.clone(this);
+                sinaps.weight = _.random(-1 * range, range) / 1000;
+                
+                this.globalSinapses[sinaps.id] = sinaps;
+                return sinaps;
             },
 
             get: function() {
                 return {
                     id: this.id,
-                    wight: this.weight
+                    inNeuronId: this.inNeuron.id,
+                    outNeuronId: this.outNeuron.id,
+                    weight: this.weight
                 };
+            },
+
+            load: function(sinaps, inNeuron, outNeuron) {
+                // dd(sinaps);
+                let newSinaps = _.clone(this);
+                newSinaps.id  = sinaps.id;
+                newSinaps.inNeuron  = inNeuron;
+                newSinaps.outNeuron = outNeuron;
+                newSinaps.weight = sinaps.weight;
+// dd(newSinaps,1);
+                this.globalSinapses[newSinaps.id] = newSinaps;
+                return newSinaps;
             },
 
             inSignal: function () {

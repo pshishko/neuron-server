@@ -8,7 +8,7 @@ module.exports = function(Server, config, _, dd) {
 
 		service.init = function() {
 
-            let network = Server.neuron.Network.init(2, 2, 2);
+            let network = Server.neuron.Network.new(2, 2, 2);
             let data = Server.neuron.NetworkGenerator.getBalancedData([0.50, 0.50], 2);
 
             Server.neuron.NetworkStorage.storeList('list', data);
@@ -16,9 +16,22 @@ module.exports = function(Server, config, _, dd) {
 
             network.training(data);
             Server.neuron.NetworkStorage.storeNetwork('network_2', network.getNetworkData());
+            console.table(network.test(data));
 
 setTimeout(() => {
-    dd(Server.neuron.NetworkStorage.loadNetwork('network_init'),1);
+    // console.table(network.test(data));
+    // let networkData2 = Server.neuron.NetworkStorage.loadNetwork('network_init');
+    // dd(networkData2);
+    // let network2 = Server.neuron.Network.load(networkData2);
+    let networkData = Server.neuron.NetworkStorage.loadNetwork('network_2');
+    let network2 = Server.neuron.Network.load(networkData);
+    Server.neuron.NetworkStorage.storeNetwork('network_22', network2.getNetworkData());
+
+    console.table(network2.test(data));
+    // dd(network2.getNetworkData(),1);
+                // network2.training(data);
+    // console.table(network2.test(networkData));
+
 
 }, 1000);
 //             Server.neuron.NetworkStorage.storeNetwork('network_2', network.getNetworkData());

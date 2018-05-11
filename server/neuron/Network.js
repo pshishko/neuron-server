@@ -10,7 +10,7 @@ module.exports = function (Server, config, _, dd) {
             hdLayers: [],
             outLayers: [],
 
-            init: function(signalsCount, hdLayersCount, hdNeuronsCount) {
+            new: function(signalsCount, hdLayersCount, hdNeuronsCount) {
                 this.inLayers = this.newLayers('in', 1, signalsCount, null);
                 this.hdLayers = this.newLayers('hd', hdLayersCount, hdNeuronsCount, this.inLayers[0]);
                 this.outLayers = this.newLayers('out', 1, 1, this.hdLayers[hdLayersCount - 1]);
@@ -21,7 +21,14 @@ module.exports = function (Server, config, _, dd) {
             newLayers: function(prefix, layersCount, neuronsCount, inLayer) {
                 var layer = inLayer || null;
                 return _.map(_.range(layersCount), function(v, key) {
-                    layer = Server.neuron.Layer.new(prefix + (key + 1), layer, neuronsCount);
+                    layer = Server.neuron.Layer.new(prefix + (key + 1), layer);
+
+                    if (inLayer && inLayer.neurons) {
+                        layer.newNeurons(neuronsCount, inLayer.neurons);                
+                    } else if (neuronsCount > 0) {
+                        layer.newNeurons(neuronsCount);                
+                    }
+
                     return layer;
                 });
             },
@@ -33,8 +40,21 @@ module.exports = function (Server, config, _, dd) {
                     }).value();
             },
 
-            loadFromData: function(data) {
-                dd(this,1);
+            load: function(networkData) {
+                let network = _.clone(this);
+                let inLayer = null;
+
+                network.layers = _.map(networkData, layer => {
+                    inLayer = Server.neuron.Layer.load(layer, inLayer);
+                    return inLayer;
+                });
+
+                // dd(_.map(network.layers, layer => {
+                //     dd(_.map(layer.neurons, neuron => {
+                //         dd(neuron.sinapses);
+                //     }));
+                // }),1);
+                return network;
             },
 
             forecast: function(data) {

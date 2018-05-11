@@ -9,21 +9,42 @@ module.exports = function (Server, config, _, dd) {
             inLayer: {},
             neurons: [],
 
-            new: function(id, inLayer, neuronsCount) {
+            new: function(id, inLayer) {
                 this.id      = id;
                 this.inLayer = inLayer;
-                if (inLayer && inLayer.neurons) {
-                    this.newNeurons(neuronsCount, inLayer.neurons);                
-                } else if (neuronsCount > 0) {
-                    this.newNeurons(neuronsCount);                
-                }
                 return _.clone(this);
             },
 
             newNeurons: function(count, inNeurons) {
                 this.neurons = _.map(_.range(count), function(v, key) {
-                    return Server.neuron.Neuron.new(this.id + '_n' + (key + 1), inNeurons);
+                    let neuron = Server.neuron.Neuron.new(this.id + '_n' + (key + 1));
+                    neuron.newSinapses(inNeurons);
+                    return neuron;
                 }.bind(this));
+            },
+
+            load: (layer, inLayer) => {
+// dd(layer);
+                let newLayer = Server.neuron.Layer.new(layer.id, inLayer);
+                newLayer.neurons = _.map(layer.neurons, neuron => {                    
+                    let newNeuron = Server.neuron.Neuron.load(neuron);
+                    if (inLayer && inLayer.neurons) {
+
+                        newNeuron.loadSinapses(neuron.sinapses, inLayer.neurons);
+                        // newNeuron.newSinapses(neuron.sinapses, inLayer.neurons);
+                    } else {
+                        // dd(neuron.outputSinapses);
+                        // newNeuron.outputSinapses = _.map(neuron.outputSinapses, sinaps => {
+                        //     return Server.neuron.Sinaps.globalSinapses[sinaps.id];
+                        // });
+                        // dd(newNeuron);
+                        // dd(neuron, 1);
+                    }
+                    // dd(neuron.sinapses);
+                    return newNeuron;
+                })
+                // dd(newLayer);
+                return newLayer;
             },
 
             get: function() {
