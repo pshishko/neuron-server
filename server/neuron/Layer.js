@@ -10,9 +10,10 @@ module.exports = function (Server, config, _, dd) {
             neurons: [],
 
             new: function(id, inLayer) {
-                this.id      = id;
-                this.inLayer = inLayer;
-                return _.clone(this);
+                let layer       = _.clone(this);
+                layer.id        = id;
+                layer.inLayer   = inLayer;
+                return layer;
             },
 
             newNeurons: function(count, inNeurons) {
@@ -23,35 +24,20 @@ module.exports = function (Server, config, _, dd) {
                 }.bind(this));
             },
 
-            load: (layer, inLayer) => {
-// dd(layer);
-                let newLayer = Server.neuron.Layer.new(layer.id, inLayer);
-                newLayer.neurons = _.map(layer.neurons, neuron => {                    
+            loadNeurons: function(neurons, inNeurons) {
+                this.neurons = _.map(neurons, neuron => {
                     let newNeuron = Server.neuron.Neuron.load(neuron);
-                    if (inLayer && inLayer.neurons) {
-
-                        newNeuron.loadSinapses(neuron.sinapses, inLayer.neurons);
-                        // newNeuron.newSinapses(neuron.sinapses, inLayer.neurons);
-                    } else {
-                        // dd(neuron.outputSinapses);
-                        // newNeuron.outputSinapses = _.map(neuron.outputSinapses, sinaps => {
-                        //     return Server.neuron.Sinaps.globalSinapses[sinaps.id];
-                        // });
-                        // dd(newNeuron);
-                        // dd(neuron, 1);
+                    if (inNeurons) {
+                        newNeuron.loadSinapses(neuron.sinapses, inNeurons);
                     }
-                    // dd(neuron.sinapses);
                     return newNeuron;
-                })
-                // dd(newLayer);
-                return newLayer;
+                });
             },
 
             get: function() {
                 return {
                     id: this.id,
                     neurons: _.map(this.neurons, neuron => {
-                        dd(neuron.get());
                         return neuron.get();
                     })
                 }

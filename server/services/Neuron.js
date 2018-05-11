@@ -8,51 +8,36 @@ module.exports = function(Server, config, _, dd) {
 
 		service.init = function() {
 
-            let network = Server.neuron.Network.new(2, 2, 2);
-            let data = Server.neuron.NetworkGenerator.getBalancedData([0.50, 0.50], 2);
-
-            Server.neuron.NetworkStorage.storeList('list', data);
-            Server.neuron.NetworkStorage.storeNetwork('network_init', network.getNetworkData());
-
+            let network = Server.neuron.Network.new(4, 3, 12);
+            let data = Server.neuron.NetworkStorage.loadList('list');
+// dd(data,1);
             network.training(data);
+
             Server.neuron.NetworkStorage.storeNetwork('network_2', network.getNetworkData());
-            console.table(network.test(data));
+            // console.table(network.test(data, true).sort((a, b) => b[6] - a[6]));
+            // Server.neuron.NetworkStorage.storeList('list', data);
+            // Server.neuron.NetworkStorage.storeNetwork('network_init', network.getNetworkData());
 
-setTimeout(() => {
-    // console.table(network.test(data));
-    // let networkData2 = Server.neuron.NetworkStorage.loadNetwork('network_init');
-    // dd(networkData2);
-    // let network2 = Server.neuron.Network.load(networkData2);
-    let networkData = Server.neuron.NetworkStorage.loadNetwork('network_2');
-    let network2 = Server.neuron.Network.load(networkData);
-    Server.neuron.NetworkStorage.storeNetwork('network_22', network2.getNetworkData());
+            setTimeout(() => {
+                let set1 = Server.neuron.NetworkGenerator.getBalancedData(2, 3);
 
-    console.table(network2.test(data));
-    // dd(network2.getNetworkData(),1);
+                set1 = _.filter(set1, function(signals) {
+                    return signals[1] != 0.5;
+                });
+
+                let set2 = Server.neuron.NetworkGenerator.getBalancedData(2, 12);
+                let data = Server.neuron.NetworkGenerator.combineSets(set1, set2);
+
+                let networkData = Server.neuron.NetworkStorage.loadNetwork('network_2');
+                let network2 = Server.neuron.Network.load(networkData);
+
+                // console.table(network2.test(data));
                 // network2.training(data);
-    // console.table(network2.test(networkData));
+                console.table(network2.test(data));
 
 
-}, 1000);
-//             Server.neuron.NetworkStorage.storeNetwork('network_2', network.getNetworkData());
-// dd(Server.neuron.NetworkStorage.loadNetwork('network_2'),1);
-            // console.table(network.test(data));
-
-            // data = Server.neuron.NetworkGenerator.getBalancedData([0.33, 0.33, 0.34], 3);
-            // console.table(network.test(data));
-
-
-            // pr(123, 1);
-
+            }, 1000);
 		}
-
-		// service.registerCronJobs = function () {
-		// 	setInterval(function () {
-		// 		// pr(Server.models.Member.getAllMembers());
-		// 		// pr(Server.models.Member.getAllMembersSock());
-		// 		// pr('users(' + Server.models.Member.getCountMembers() + ')');
-		// 	}, 10 * 1000);
-		// };
 
 		return service;
 	}();

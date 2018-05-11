@@ -26,7 +26,7 @@ module.exports = function (Server, config, _, dd) {
 
             newSinapses: function(inNeurons) {
                 this.sinapses = _.map(inNeurons, (inNeuron, key) => {
-                    let sinaps = Server.neuron.Sinaps.new('(' + inNeuron.id + ')/(' + this.id + ')' + (key + 1), inNeuron, this);
+                    let sinaps = Server.neuron.Sinaps.new(inNeuron.id + '/' + this.id + '/s' + (key + 1), inNeuron, this);
                     inNeuron.outputSinapses.push(sinaps);
                     return sinaps;
                 });
@@ -34,9 +34,6 @@ module.exports = function (Server, config, _, dd) {
 
             load: function(neuron) {
                 let newNeuron = this.new(neuron.id);
-                newNeuron.EI = neuron.EI;
-                newNeuron.weight = neuron.weight;
-                newNeuron.deviationActivation = neuron.deviationActivation;
                 return newNeuron;
             },
 
@@ -49,7 +46,6 @@ module.exports = function (Server, config, _, dd) {
             },
 
             get: function() {
-                dd(this);
                 return {
                     id: this.id,
                     sinapses: _.map(this.sinapses, sinaps => {
@@ -57,9 +53,7 @@ module.exports = function (Server, config, _, dd) {
                     }),
                     outputSinapses: _.map(this.outputSinapses, sinaps => {
                         return sinaps.get();
-                    }),
-                    EI: this.EI,
-                    deviationActivation: this.deviationActivation,
+                    })
                 };
             },
 

@@ -29,6 +29,7 @@ module.exports = function (Server, config, _, dd) {
                         layer.newNeurons(neuronsCount);                
                     }
 
+                    inLayer = layer;
                     return layer;
                 });
             },
@@ -45,8 +46,15 @@ module.exports = function (Server, config, _, dd) {
                 let inLayer = null;
 
                 network.layers = _.map(networkData, layer => {
-                    inLayer = Server.neuron.Layer.load(layer, inLayer);
-                    return inLayer;
+                    let newLayer = Server.neuron.Layer.new(layer.id, inLayer);
+
+                    if (inLayer && inLayer.neurons) {
+                        newLayer.loadNeurons(layer.neurons, inLayer.neurons);
+                    } else {
+                        newLayer.loadNeurons(layer.neurons);
+                    }
+                    inLayer = newLayer;
+                    return newLayer;
                 });
 
                 // dd(_.map(network.layers, layer => {
@@ -84,12 +92,14 @@ module.exports = function (Server, config, _, dd) {
                 let avgDeviation = 1;
                 let maxDeviation = 1;
 
-                while (epoch < 20000 && (avgDeviation >= 0.08 || maxDeviation >= 0.08 || epoch <= 100)) {
+                while (epoch < 20000 && (avgDeviation >= 0.03 || maxDeviation >= 0.08 || epoch <= 100)) {
                     epoch++;
 
                     let deviations = [];
-                    _.each(_.slice(list, 0, -1), (row) => {
-                        deviations.push(this.learn(row, _.last(row)));
+                    
+                    _.each(list, (row) => {
+                        let signals = _.slice(row, 0, -1);
+                        deviations.push(this.learn(signals, _.last(row)));
                     });
                     avgDeviation = _.sum(deviations) / deviations.length;
                     maxDeviation =  _.max(deviations);
@@ -101,27 +111,26 @@ module.exports = function (Server, config, _, dd) {
                 return epoch;
             },
 
-            test: function(list) {
+            test: function(list, withResults) {
                 return _.map(list, (row) => {
-                    let signals         = _.slice(row, 0, -1);
+                    let signals = withResults ? _.slice(row, 0, -1) : row;
+
                     let result          = row[signals.length];
                     let approximation   = this.forecast(signals);
-// pr(signals);
-// pr(result);
-// pr(approximation, 1);
+
                     // row.push(Math.round(this.forecast(signals), -2))
-                    signals.push(result);
+                    // signals.push(result);
                     signals.push(this.round(result));
-                    signals.push(approximation);
+                    // signals.push(approximation);
                     signals.push(this.round(approximation));
                     signals.push(this.round(Math.abs(result - approximation)));
                     return signals;
-                }).sort((a, b) => a[0] < b[0]);
+                }).sort((a, b) => b[5] - a[5]);
             },
         
     /******************************************************************************************************************/
             round: function(float) {
-                return Math.round(float * 100) / 100;
+                return Math.round(float * 1000) / 1000;
             },
 
             getOutputNeuron: function() {

@@ -18,7 +18,7 @@ module.exports = function (Server, config, _, dd) {
                 sinaps.inNeuron    = inNeuron;
                 sinaps.outNeuron   = outNeuron;
 
-                let range = (1 / 9) * 1000;
+                let range = (1 / 2) * 1000;
                 sinaps.weight = _.random(-1 * range, range) / 1000;
                 
                 this.globalSinapses[sinaps.id] = sinaps;
@@ -28,8 +28,6 @@ module.exports = function (Server, config, _, dd) {
             get: function() {
                 return {
                     id: this.id,
-                    inNeuronId: this.inNeuron.id,
-                    outNeuronId: this.outNeuron.id,
                     weight: this.weight
                 };
             },

@@ -19,6 +19,10 @@ module.exports = function (Server, config, _, dd) {
                 return JSON.parse(this.loadFile(name));
             },
 
+            loadList: function(name) {
+                return this.splitList(this.loadFile(name));
+            },
+
             storeFile: (name, content) => {
                 fs.writeFile('./server/tmp/'+ name +'.tst', content, function (err) {
                     if (err) throw err;
@@ -27,7 +31,7 @@ module.exports = function (Server, config, _, dd) {
             },
 
             loadFile: (name) => {
-                return fs.readFileSync('./server/tmp/'+ name +'.tst');/*, content, function (err) {
+                return fs.readFileSync('./server/tmp/'+ name +'.tst', 'utf8');/*, content, function (err) {
                     if (err) throw err;
                     dd('List stored successful path: ./server/tmp/'+ name +'.tst');
                 });*/
@@ -43,7 +47,11 @@ module.exports = function (Server, config, _, dd) {
                     .join('\n');
             },
 
+            splitList: content => {
+                return _.filter(_.map(content.split('\n'), row => {
+                    return row.split(' ');
+                }), row => row.length > 1);
+            },
         };
-
 	}();
 };
