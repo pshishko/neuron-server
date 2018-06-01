@@ -1,4 +1,4 @@
-module.exports = function (Server, config, _, pr) {
+module.exports = function (Server, config, _, dd) {
 
 	'use strict';
 
@@ -56,7 +56,7 @@ module.exports = function (Server, config, _, pr) {
 		/******************************************************************************************************************/
 		
 		Server.services.Socket.addEvent('User.connect', function(socket, user) {
-			pr('connect');
+			dd('connect');
 			if (user && user.access_token && user.access_token !== 'undefined') {
 				service.getProfile(socket, user.access_token, function(user) {
 					service.addConnection(socket, user);
@@ -70,11 +70,12 @@ module.exports = function (Server, config, _, pr) {
 		});
 
 		service.disconnect = function(socket) {
-			pr('disconnect');
+			dd('disconnect');
 			this.removeConnection(socket);
 		};
 
 		service.addConnection = function(socket, user) {
+            dd(123);
 			this.joinChannel(socket, 'uid', user.id);
 			this.joinChannel(socket, 'access', user.access_token);
 			this.joinChannel(socket, 'role', user.role);

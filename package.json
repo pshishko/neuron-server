@@ -11,7 +11,8 @@
     "lodash": "^4.17.10",
     "optimist": "*",
     "restler": "*",
-    "socket.io": "*"
+    "socket.io": "*",
+    "system-sleep": "^1.3.6"
   },
   "devDependencies": {},
   "engines": {

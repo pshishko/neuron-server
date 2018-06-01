@@ -7,7 +7,7 @@ module.exports = function (Server, config, _, pr) {
 		var init = function () {
 			Server.services.Socket.init();
 			Server.services.Cron.init();
-            Server.services.Neuron.init();
+            // Server.services.Neuron.init();
 		};
 
 		return {

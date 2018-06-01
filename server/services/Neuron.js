@@ -5,15 +5,19 @@ module.exports = function(Server, config, _, dd) {
 	return function() {
 
 		var service = {};
+        service.network = {};
 
-		service.init = function() {
+		service.init = function(callback) {
 
-            let network = Server.neuron.Network.new(4, 3, 12);
+            // let network = Server.neuron.Network.new(4, 3, 12);
+            service.network = Server.neuron.Network.new(2, 2, 2);
             let data = Server.neuron.NetworkStorage.loadList('list');
-// dd(data,1);
-            network.training(data);
 
-            Server.neuron.NetworkStorage.storeNetwork('network_2', network.getNetworkData());
+            service.network.training(data, () => {
+                callback(service.network.getNetworkData());
+            });
+
+            Server.neuron.NetworkStorage.storeNetwork('network_2', service.network.getNetworkData());
             // console.table(network.test(data, true).sort((a, b) => b[6] - a[6]));
             // Server.neuron.NetworkStorage.storeList('list', data);
             // Server.neuron.NetworkStorage.storeNetwork('network_init', network.getNetworkData());
@@ -37,7 +41,18 @@ module.exports = function(Server, config, _, dd) {
 
 
             }, 1000);
-		}
+		};
+
+        service.trainingStop = function() {
+            service.network.isTraining = false;
+        }
+
+
+
+        // service.getNetwork = function() {
+        //     let networkData = Server.neuron.NetworkStorage.loadNetwork('network_22');
+        //     let network2 = Server.neuron.Network.load(networkData);
+        // };
 
 		return service;
 	}();

@@ -3,12 +3,15 @@ module.exports = function (Server, config, _, dd) {
 	'use strict';
 
 	return function () {
+        
+        var sleep = require('system-sleep');
 
         return {
             layers: [],
             inLayers: [],
             hdLayers: [],
             outLayers: [],
+            isTraining: true,
 
             new: function(signalsCount, hdLayersCount, hdNeuronsCount) {
                 this.inLayers = this.newLayers('in', 1, signalsCount, null);
@@ -87,12 +90,13 @@ module.exports = function (Server, config, _, dd) {
                 return deviation;
             },
 
-            training: function(list) {
+            training: function(list, callback) {
+                this.isTraining = true;
                 let epoch = 0;
                 let avgDeviation = 1;
                 let maxDeviation = 1;
 
-                while (epoch < 20000 && (avgDeviation >= 0.03 || maxDeviation >= 0.08 || epoch <= 100)) {
+                while (this.isTraining == true && epoch < 20000 && (avgDeviation >= 0.03 || maxDeviation >= 0.08 || epoch <= 100)) {
                     epoch++;
 
                     let deviations = [];
@@ -106,6 +110,9 @@ module.exports = function (Server, config, _, dd) {
                     if (epoch % 100 === 0) {
                         dd('On epoch ' + epoch + ' max ' + maxDeviation + ' avg ' + avgDeviation);
                     }
+                    
+                    callback();
+                    sleep(1000); // 5 seconds
                 }
 
                 return epoch;
