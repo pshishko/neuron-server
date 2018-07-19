@@ -16,7 +16,7 @@ module.exports = function(Server, config, _, pr) {
 		/******************************************************************************************************************/
 
         service.model.on('getStored', function(socket) {
-            let networkData = Server.neuron.NetworkStorage.loadNetwork('network_22');
+            let networkData = Server.neuron.NetworkStorage.loadNetwork('network_2');
             Server.services.Socket.sendSecureSocket('Neuron.onNeuronGetStored', socket.id, networkData);
         });
 

@@ -109,10 +109,10 @@ module.exports = function (Server, config, _, dd) {
                     maxDeviation =  _.max(deviations);
                     if (epoch % 100 === 0) {
                         dd('On epoch ' + epoch + ' max ' + maxDeviation + ' avg ' + avgDeviation);
+                        callback();
                     }
                     
-                    callback();
-                    sleep(1000); // 5 seconds
+                    // sleep(1000); // 5 seconds
                 }
 
                 return epoch;
@@ -133,6 +133,23 @@ module.exports = function (Server, config, _, dd) {
                     signals.push(this.round(Math.abs(result - approximation)));
                     return signals;
                 }).sort((a, b) => b[5] - a[5]);
+            },
+
+            testList: function(list) {
+                return _.map(list, (row) => {
+                    let signals = row;
+
+                    let result          = row[signals.length];
+                    let approximation   = this.forecast(signals);
+
+                    // row.push(Math.round(this.forecast(signals), -2))
+                    // signals.push(result);
+                    // signals.push(this.round(result));
+                    // signals.push(approximation);
+                    signals.push(this.round(approximation));
+                    // signals.push(this.round(Math.abs(result - approximation)));
+                    return signals;
+                }).sort((a, b) => b[2] - a[2]);
             },
         
     /******************************************************************************************************************/
